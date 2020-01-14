@@ -77,7 +77,7 @@ class Xunhupay extends \PhalApi\Api {
             'title' => $data['title'],
             'add_time' => time(),
             'nonce_str' => $data['nonce_str'],
-            'plugins' => $data['plugins'],
+            'plugins' => strval($this->plugins),
             'order_status' => 0,
         );
         $model = new \PhalApi\Xunhupay\Model\XunhupayOrder();
