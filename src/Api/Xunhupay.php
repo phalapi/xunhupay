@@ -65,6 +65,19 @@ class Xunhupay extends \PhalApi\Api {
         if (!empty($this->plugins))
 			$data['plugins']   =$this->plugins;//根据自己需要自定义插件ID，唯一的，匹配[a-zA-Z\d\-_]+
 
+        // 订单入库
+        $orderData = array(
+            'trade_order_id' => $data['trade_order_id'],
+            'payment' => $data['payment'],
+            'total_fee' => $data['total_fee'],
+            'title' => $data['title'],
+            'add_time' => time(),
+            'nonce_str' => $data['nonce_str'],
+            'plugins' => $data['plugins'],
+            'order_status' => 0,
+        );
+        $model = new \PhalApi\Xunhupay\Model\XunhupayOrder();
+        $model->insert($orderData);
 		
 		$hashkey =$appsecret;
 		$data['hash']     = \XH_Payment_Api::generate_xh_hash($data,$hashkey);
