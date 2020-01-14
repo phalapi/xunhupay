@@ -183,9 +183,9 @@ class Xunhupay extends \PhalApi\Api {
             }
 
             // 更新订单为已支付
-            // if (!empty($result['data']['status']) && $result['data']['status'] == 'OD' && $orderInfo['order_status'] == 0) {
-            //     $model->update($orderInfo['id'], array('order_status' => 1));
-            // }
+            if (!empty($result['data']['status']) && $result['data']['status'] == 'OD' && $orderInfo['order_status'] == 0) {
+                $model->update($orderInfo['id'], array('order_status' => 1));
+            }
         
             return $result;
         } catch (\Exception $e) {
