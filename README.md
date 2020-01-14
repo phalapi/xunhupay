@@ -1,10 +1,19 @@
 # PhalApi 2.x 虎皮椒支付扩展
 
 ## 安装
-使用composer命令进行安装：  
+修改composer.json文件，添加：
+```
+    "require": {
+        "phalapi/xunhupay": "dev-master"
+    },
+```
+然后再进行composer update操作。  
+
+如果要简化操作，可以直接使用composer命令进行安装：  
 ```
 $ composer require phalapi/xunhupay
 ```
+
 
 安装好后，还需要在根目录的composer.json文件的psr-4中添加配置，以便在线接口文档可以加载扩展里面的接口。
 ```
