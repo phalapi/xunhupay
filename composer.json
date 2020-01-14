@@ -1,0 +1,26 @@
+{
+    "name": "phalapi/xunhupay",
+    "description": "PhalApi 2.x 虎皮椒支付扩展",
+    "type": "library",
+    "keywords": [
+        "phalapi", "phalapi-xunhupay", "xunhupay"
+    ],
+    "license": "GPL-3.0+",
+    "minimum-stability": "dev",
+    "homepage": "https://www.phalapi.net/",
+    "authors": [
+        {
+            "name": "dogstar huang",
+            "email": "chanzonghuang@gmail.com",
+            "homepage": "http://my.oschina.net/dogstar",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+    },
+    "autoload": {
+        "psr-4": {
+            "PhalApi\\Xunhupay\\": "src"
+        }
+    } 
+}
