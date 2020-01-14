@@ -10,6 +10,6 @@ return array(
         ),
         'appid' => '2147483647', // TODO 修改成你的APPID
         'appsecret' => '160130736b1ac0d54ed7abe51e44840b', // TODO 修改成你的密钥
-        'notify_url' => '', // TODO 成功支付后的回调地址
+        'notify_url' => 'http://api.demo.com/notify_url.php', // TODO 成功支付后的回调地址
     ),
 );
