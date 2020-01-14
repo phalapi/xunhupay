@@ -23,6 +23,9 @@ class Xunhupay extends \PhalApi\Api {
                 'plugins' => array('name' => 'plugins', 'desc' => '备注,可选。备注字段，可以传入一些备注数据，回调时原样返回'),
                 'isJump' => array('name' => 'is_jump', 'type' => 'boolean', 'default' => true, 'desc' => '是否直接跳转到支付页面'),
             ),
+            'orderQuery' => array(
+                'trade_order_id' => array('name' => 'trade_order_id', 'regex' => '/[a-zA-Z\d\-_]{1,}/', 'desc' => '商户订单号', 'require' => true),
+            ),
         );
     }
 
@@ -30,6 +33,7 @@ class Xunhupay extends \PhalApi\Api {
      * 发起支付接口
      * @desc 发起支付接口，实现微信、支付宝支付的接口
      * @return string pay_url 客户端待跳转的支付链接，当指定由接口跳转时接口则直接跳转
+     * @return string trade_order_id 未跳转时返回订单号
      */
     public function paymentDo() {
 		$trade_order_id = time();//商户网站内部ID，此处time()是演示数据
@@ -117,7 +121,7 @@ class Xunhupay extends \PhalApi\Api {
                 header("Location: $pay_url");
                 exit;
             }
-            return array('pay_url' => $pay_url);
+            return array('pay_url' => $pay_url, 'trade_order_id' => $this->trade_order_id);
 		} catch (\Exception $e) {
 			//echo "errcode:{$e->getCode()},errmsg:{$e->getMessage()}";
             \PhalApi\DI()->logger->error('虎皮椒发起支付失败，错误信息：' . $e->getMessage());
@@ -132,5 +136,60 @@ class Xunhupay extends \PhalApi\Api {
      * @desc 订单查询接口
      */
     public function orderQuery() {
+        $di = \PhalApi\DI();
+        $cfg = $di->config->get('app.xunhupay');
+        $appid              = $cfg['appid'];
+        $appsecret          = $cfg['appsecret'];
+
+        $out_trade_order = $this->trade_order_id;//商户网站订单号
+
+        // 获取订单
+        $model = new \PhalApi\Xunhupay\Model\XunhupayOrder();
+        $orderInfo = $model->getOrderInfo($out_trade_order);
+        if (empty($orderInfo)) {
+            throw new BadRequestException('订单不存在');
+        }
+        
+        //out_trade_order，open_order_id 二选一
+        $request=array(
+            'appid'     => $appid, //必须的，APPID
+        
+            'out_trade_order'=> $out_trade_order, //网站订单号(out_trade_order，open_order_id 二选一)
+            //'open_order_id'=> $open_order_id, //虎皮椒内部订单号，在下单时会返回，或支付后会异步回调(out_trade_order，open_order_id 二选一)
+        
+            'time'      => time(),//必须的，当前时间戳，根据此字段判断订单请求是否已超时，防止第三方攻击服务器
+            'nonce_str' => str_shuffle(time())//必须的，随机字符串，作用：1.避免服务器缓存，2.防止安全密钥被猜测出来
+        );
+        
+        $request['hash'] =  \XH_Payment_Api::generate_xh_hash($request,$appsecret);
+        
+        $url              = $cfg['api']['query'];
+        
+        try {
+            $response     = \XH_Payment_Api::http_post($url, http_build_query($request));
+            /**
+             * 支付回调数据
+             * @var array(
+             *      status,//OD：已支付  WP:未支付  CD 已取消
+             *  )
+             */
+            $result       = $response?json_decode($response,true):null;
+            if(!$result){
+                throw new InternalServerErrorException('Internal server error:'.$response);
+            }
+
+            // 更新订单为已支付
+            // if (!empty($result['data']['status']) && $result['data']['status'] == 'OD' && $orderInfo['order_status'] == 0) {
+            //     $model->update($orderInfo['id'], array('order_status' => 1));
+            // }
+        
+            return $result;
+        } catch (\Exception $e) {
+            //echo "errcode:{$e->getCode()},errmsg:{$e->getMessage()}";
+            //TODO:处理支付调用异常的情况
+            \PhalApi\DI()->logger->error('虎皮椒发起支付失败，错误信息：' . $e->getMessage());
+			//TODO:处理支付调用异常的情况
+            throw new InternalServerErrorException('查询失败，错误信息请查看文件日志');
+        }
     }
 }
