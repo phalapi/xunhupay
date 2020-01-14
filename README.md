@@ -99,6 +99,10 @@ return array(
 ![](http://cdn7.okayapi.com/yesyesapi_20200114164919_6b1a132621eefbb892458860c185eff9.png)
 
 
+小结：  
+ + 1、要么用ajax请求，把json拿回来，用js进行跳转（js_jump=0）
+ + 2、要么直接把接口当作跳转链接，用a标签新窗口打开（js_jump=1）
+
 2、支付成功后，会回调到xunhupay_notify.php  
 
 手机扫码后，  
