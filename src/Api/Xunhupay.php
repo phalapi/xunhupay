@@ -125,6 +125,8 @@ class Xunhupay extends \PhalApi\Api {
                 header("Location: $pay_url");
                 exit;
             }
+
+            header('Access-Control-Allow-Origin:*');   //支持跨域请求
             return array('pay_url' => $pay_url, 'trade_order_id' => $this->trade_order_id);
 		} catch (\Exception $e) {
 			//echo "errcode:{$e->getCode()},errmsg:{$e->getMessage()}";
@@ -140,6 +142,8 @@ class Xunhupay extends \PhalApi\Api {
      * @desc 订单查询接口
      */
     public function orderQuery() {
+        header('Access-Control-Allow-Origin:*');   //支持跨域请求
+
         $out_trade_order = $this->trade_order_id;//商户网站订单号
 
         // 获取订单
