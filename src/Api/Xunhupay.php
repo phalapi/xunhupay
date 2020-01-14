@@ -81,7 +81,11 @@ class Xunhupay extends \PhalApi\Api {
             'order_status' => 0,
         );
         $model = new \PhalApi\Xunhupay\Model\XunhupayOrder();
-        $model->insert($orderData);
+        try {
+            $model->insert($orderData);
+        } catch (\PDOException $ex) {
+            // 重复下单
+        }
 		
 		$hashkey =$appsecret;
 		$data['hash']     = \XH_Payment_Api::generate_xh_hash($data,$hashkey);
