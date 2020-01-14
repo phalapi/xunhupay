@@ -22,11 +22,6 @@ require_once API_ROOT . '/vendor/phalapi/xunhupay/src/sdk/api.php';
          'status'=>'OD'//订单状态，OD已支付，WP未支付
  *   )
  */
- 
-$di = \PhalApi\DI();
-$cfg = $di->config->get('app.xunhupay');
-$appid              = $cfg['appid'];
-$appsecret          = $cfg['appsecret'];
 $my_plugin_id       = 'my-plugins-id';
 
 $data = $_POST;
@@ -42,6 +37,21 @@ if(!isset($data['hash'])||!isset($data['trade_order_id'])){
 //    echo 'failed';exit;
 //}
 
+//商户订单ID
+$trade_order_id =$data['trade_order_id'];
+
+$model = new \PhalApi\Xunhupay\Model\XunhupayOrder();
+$orderInfo = $model->getOrderInfo($trade_order_id);
+if (empty($orderInfo)) {
+	// 订单不存在
+	echo 'failed';exit;
+}
+ 
+$di = \PhalApi\DI();
+$cfg = $di->config->get('app.xunhupay');
+$appid              = $cfg[$orderInfo['payment']]['appid'];
+$appsecret          = $cfg[$orderInfo['payment']]['appsecret'];
+
 //APP SECRET
 $appkey =$appsecret;
 $hash =XH_Payment_Api::generate_xh_hash($data,$appkey);
@@ -50,16 +60,7 @@ if($data['hash']!=$hash){
     echo 'failed';exit;
 }
 
-//商户订单ID
-$trade_order_id =$data['trade_order_id'];
-
 if($data['status']=='OD'){
-	$model = new \PhalApi\Xunhupay\Model\XunhupayOrder();
-	$orderInfo = $model->getOrderInfo($trade_order_id);
-	if (empty($orderInfo)) {
-		// 订单不存在
-		echo 'failed';exit;
-	}
 	// 更新订单为已支付
 	$model->update($orderInfo['id'], array('order_status' => 1));
     /************商户业务处理******************/

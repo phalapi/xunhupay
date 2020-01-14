@@ -40,8 +40,8 @@ class Xunhupay extends \PhalApi\Api {
 
         $di = \PhalApi\DI();
         $cfg = $di->config->get('app.xunhupay');
-        $appid              = $cfg['appid'];
-        $appsecret          = $cfg['appsecret'];
+        $appid              = $cfg[$this->payment]['appid'];
+        $appsecret          = $cfg[$this->payment]['appsecret'];
 
         if (empty($this->trade_order_id)) {
             $this->trade_order_id = date('YmdHis') . rand(10000, 99999);
@@ -140,11 +140,6 @@ class Xunhupay extends \PhalApi\Api {
      * @desc 订单查询接口
      */
     public function orderQuery() {
-        $di = \PhalApi\DI();
-        $cfg = $di->config->get('app.xunhupay');
-        $appid              = $cfg['appid'];
-        $appsecret          = $cfg['appsecret'];
-
         $out_trade_order = $this->trade_order_id;//商户网站订单号
 
         // 获取订单
@@ -154,6 +149,11 @@ class Xunhupay extends \PhalApi\Api {
             throw new BadRequestException('订单不存在');
         }
         
+        $di = \PhalApi\DI();
+        $cfg = $di->config->get('app.xunhupay');
+        $appid              = $cfg[$orderInfo['payment']]['appid'];
+        $appsecret          = $cfg[$orderInfo['payment']]['appsecret'];
+
         //out_trade_order，open_order_id 二选一
         $request=array(
             'appid'     => $appid, //必须的，APPID
