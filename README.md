@@ -103,7 +103,25 @@ return array(
  + 1、要么用ajax请求，把json拿回来，用js进行跳转（js_jump=0）
  + 2、要么直接把接口当作跳转链接，用a标签新窗口打开（js_jump=1）
 
-2、支付成功后，会回调到xunhupay_notify.php  
+2、支付成功后，会回调到xunhupay_notify.php，在里面进行业务的处理。
+```php
+if($data['status']=='OD'){
+	// 更新订单为已支付
+	$model->update($orderInfo['id'], array('order_status' => 1));
+    /************商户业务处理******************/
+    //TODO:此处处理订单业务逻辑,支付平台会多次调用本接口(防止网络异常导致回调失败等情况)
+    //     请避免订单被二次更新而导致业务异常！！！
+    //     if(订单未处理){
+    //         处理订单....
+    //      }
+
+    //....
+    //...
+    /*************商户业务处理 END*****************/
+}else{
+    //处理未支付的情况
+}
+```  
 
 手机扫码后，  
 ![](http://cdn7.okayapi.com/yesyesapi_20200114165406_0ae1fbbdbadd6c96d31190c2caec35d6.png)
